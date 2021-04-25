@@ -51,11 +51,6 @@ export default class Send extends React.Component {
     this.setState({ amount: event.target.value });
   }
 
-  seeValue() {
-    console.log("amount is" + this.state.amount);
-    console.log("reciever is" + this.state.reciever);
-  }
-
   validate = (e) => {
     e.preventDefault();
 
