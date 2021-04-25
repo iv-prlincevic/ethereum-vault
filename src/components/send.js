@@ -28,7 +28,6 @@ export default class Send extends React.Component {
     this.sendETH = this.sendETH.bind(this);
     this.handleRecieverChange = this.handleRecieverChange.bind(this);
     this.handleAmountChange = this.handleAmountChange.bind(this);
-    this.seeValue = this.seeValue.bind(this);
     this.getBalance = this.getBalance.bind(this);
     this.showModal = this.showModal.bind(this);
     this.validate = this.validate.bind(this);
