@@ -52,8 +52,7 @@ export default class Wallet extends React.Component {
           }}
         >
           <Card.Body>
-            <h3>Welcome to Ethereum web vault</h3>
-            <h3>When you create a wallet you can:</h3>
+            <h4>When you create a wallet you can:</h4>
             <br></br>
             <ul style={{ textAlign: "start" }}>
               <li>See your ETH address of the wallet</li>

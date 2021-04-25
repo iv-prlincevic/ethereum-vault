@@ -110,7 +110,7 @@ export default class transactionHistory extends React.Component {
                     </thead>
                     <tbody>
                       {this.state.transactions.map((tx, index) => (
-                        <tr>
+                        <tr key={index}>
                           <td>{tx.from}</td>
                           <td>{tx.to}</td>
                           <td>
