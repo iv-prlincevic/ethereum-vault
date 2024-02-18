@@ -16,6 +16,9 @@
     text-align: center;
   }
 }
+.logo {
+  margin: 20px;
+}
 label {
   display: flex;
   color: #fff;

@@ -1,24 +1,32 @@
 import "./App.css";
 import Wallet from "./components/createWallet";
 import WalletInfo from "./components/wallet-info";
-import { Router, Route, Switch } from "react-router-dom";
-import history from "./history";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 import Send from "./components/send";
-import transactionHistory from "./components/transactionHistory";
-import Recieve from "./components/receive";
+import TransactionHistory from "./components/transactionHistory";
+import Receive from "./components/receive";
+import NavBar from "./components/navigationBar";
+import PriceChart from "./components/priceChart";
 
 function App() {
   return (
     <div className="App">
-      <Router history={history}>
-        <Switch>
-          <Route exact path="/" component={Wallet} />
-          <Route path="/receive" component={Recieve} />
-          <Route path="/wallet-info" component={WalletInfo} />
-          <Route path="/send" component={Send} />
-          <Route path="/transaction-history" component={transactionHistory} />
-        </Switch>
-      </Router>
+      
+      <BrowserRouter >
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Wallet />} />
+          <Route path="/send" element={<Send />} />
+          <Route path="/receive" element={<Receive />} />
+          <Route path="/wallet-info" element={<WalletInfo />} />
+          <Route path="/transaction-history" element={<TransactionHistory />} />
+          <Route path="/price-history" element={<PriceChart />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

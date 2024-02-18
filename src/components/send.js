@@ -1,140 +1,130 @@
-import Web3 from "web3";
-import React from "react";
-import { Button, Card, Modal, Form, Nav } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Modal, Form, } from "react-bootstrap";
 import ls from "local-storage";
-import history from "../history";
+import web3 from '../common';
 
-let web3 = new Web3(
-  new Web3.providers.HttpProvider(
-    "https://rinkeby.infura.io/v3/032016e8ed9d48759a11bae809058fe5"
-  )
-);
+const Send = (props) => {
+   const [show, setShow] = useState(false);
+   const [receiver, setReceiver] = useState(ls.get("withdrawAddress"));
+   const [publicAddress,] = useState(ls.get('publicAddress'));
+   const [privateKey,] =useState(ls.get('privateKey'));
+   const [balance,setBalance] =  useState(0);
+   const [amount, setAmount] = useState(0);
+   const [amountError, setAmountError] = useState("");
+   const [receiverError, setReceiverError] = useState("");
+   const [successfullySent, setSuccessfullySent] = useState("");
 
-export default class Send extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      show: false,
-      close: false,
-      reciever: ls.get("withdrawAddress"),
-      publicAddress: this.props.history.location.state.publicAddress,
-      privateKey: this.props.history.location.state.privateKey,
-      balance: 0,
-      amount: 0,
-      amountError: "",
-      recieverError: "",
-      successfullySent: "",
+   useEffect(() => {
+     getBalance();
+     });
+
+    const getBalance = async () => {
+      await web3.eth.getBalance(publicAddress).then((balance) => {
+        setBalance(web3.utils.fromWei(balance, "ether"));
+      });
     };
-    this.sendETH = this.sendETH.bind(this);
-    this.handleRecieverChange = this.handleRecieverChange.bind(this);
-    this.handleAmountChange = this.handleAmountChange.bind(this);
-    this.getBalance = this.getBalance.bind(this);
-    this.showModal = this.showModal.bind(this);
-    this.validate = this.validate.bind(this);
-  }
+    const validate = (e) => {
+      e.preventDefault();
+  
+      let amountError = "";
+      let receiverError = "";
+  
+      if (amount > balance) {
+        amountError = "Insufficient funds";
+      }
+      if (amount === 0) {
+        amountError = "Your amount must be bigger than 0";
+      }
+      if (!receiver) {
+        receiverError = "Please enter reciever address";
+      } else if (!web3.utils.isAddress(receiver)){
+        receiverError = "Please enter a valid receiver address";
+      }
+      if (amountError || receiverError) {
+        setAmountError(amountError);
+        setReceiverError(receiverError);
+        setShow(false);
+        return false;
+      }
 
-  componentDidMount() {
-    this.getBalance();
-  }
+      setReceiverError("");
+      setAmountError("");
+      setShow(true);
+  
+      return true;
+    };
 
-  getBalance = async () => {
-    await web3.eth.getBalance(this.state.publicAddress).then((balance) => {
-      this.setState({ balance: web3.utils.fromWei(balance, "ether") });
-    });
-  };
-
-  handleRecieverChange(event) {
-    this.setState({ reciever: event.target.value });
-  }
-  handleAmountChange(event) {
-    this.setState({ amount: event.target.value });
-  }
-
-  validate = (e) => {
-    e.preventDefault();
-
-    let amountError = "";
-    let recieverError = "";
-
-    if (this.state.amount > this.state.balance) {
-      amountError = "Insufficient funds";
-    }
-    if (this.state.amount === 0) {
-      amountError = "Your amount must be bigger than 0";
-    }
-    if (!this.state.reciever) {
-      recieverError = "Please enter reciever address";
-    }
-    if (amountError || recieverError) {
-      this.setState({ amountError, recieverError, show: false });
-      return false;
-    }
-
-    this.setState({ recieverError: "", amountError: "", show: true });
-    return true;
-  };
-
-  sendETH = async () => {
-    try {
-      const transaction = await web3.eth.accounts.signTransaction(
-        {
-          from: this.state.publicAddress,
-          to: this.state.reciever,
-          value: web3.utils.toWei(this.state.amount, "ether"),
-          gas: "55000",
-          gasPrice: web3.eth.gasPrice,
-        },
-        this.state.privateKey
-      );
-
-      await web3.eth
-        .sendSignedTransaction(transaction.rawTransaction)
-        .then(() => {
-          this.setState({
-            show: false,
-            successfullySent: "Transaction successfully sent",
+    const sendETH = async () => {
+      try {
+        const transaction = await web3.eth.accounts.signTransaction(
+          {
+            from: publicAddress,
+            to: receiver,
+            value: web3.utils.toWei(amount, "ether"),
+            gas: "55000",
+            gasPrice: web3.eth.gasPrice,
+          },
+          privateKey
+        );
+  
+        await web3.eth
+          .sendSignedTransaction(transaction.rawTransaction)
+          .then(() => {
+            setShow(false);
+            setSuccessfullySent('Transaction successfully sent');
+            this.getBalance();
+          }).finally(()=>{
+            setTimeout(() => {
+              setSuccessfullySent('');
+            }, 5000);
+            setAmount(0);
+            setReceiver('');
           });
-          this.getBalance();
-        });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  showModal() {
-    return (
-      <>
-        <Button variant="primary" onClick={this.validate}>
-          Confirm transaction
-        </Button>
-        <Modal show={this.state.show} animation={true} size="md" shadow-lg>
-          <Modal.Header>
-            <Modal.Title className="text-center">
-              <h5>Confirmation</h5>
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p>Are you sure you want to send transaction</p>
-          </Modal.Body>
-          <Modal.Footer className="py-1 d-flex justify-content-center">
-            <div>
-              <Button onClick={() => this.setState({ show: false })}>
-                Cancel
-              </Button>
-            </div>
-            <div>
-              <Button onClick={this.sendETH} className="mx-2 px-3">
-                Confirm
-              </Button>
-            </div>
-          </Modal.Footer>
-        </Modal>
-      </>
-    );
-  }
 
-  render() {
-    return (
-      <div
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+
+    const ShowModal = () => {
+      return (
+        <>
+          <Button variant="primary" onClick={validate}>
+            Confirm transaction
+          </Button>
+          <Modal show={show} animation={true} size="md">
+            <Modal.Header>
+              <Modal.Title className="text-center">
+                <h5>Confirmation</h5>
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Are you sure you want to send this transaction:</p>
+              <div>
+               <p>To: <b>{receiver}</b></p> 
+               <p>Amount: <b>{amount} ETH</b></p> 
+              </div>
+            </Modal.Body>
+            <Modal.Footer className="py-1 d-flex justify-content-center">
+              <div>
+                <Button onClick={() => setShow(false)}>
+                  Cancel
+                </Button>
+              </div>
+              <div>
+                <Button onClick={sendETH} className="mx-2 px-3">
+                  Confirm
+                </Button>
+              </div>
+            </Modal.Footer>
+          </Modal>
+        </>
+      );
+    }
+
+  return (
+  <div
         className="nav-menu"
         style={{
           display: "grid",
@@ -149,76 +139,56 @@ export default class Send extends React.Component {
             margin: "20px",
           }}
         >
-          <Card.Header>
-            <Nav
-              fill
-              variant="tabs"
-              onSelect={(key) =>
-                history.push({
-                  pathname: key,
-                  state: {
-                    publicAddress: this.state.publicAddress,
-                    privateKey: this.state.privateKey,
-                    balance: this.state.balance,
-                  },
-                })
-              }
-              defaultActiveKey="/send"
-            >
-              <Nav.Item>
-                <Nav.Link eventKey="/send">Send</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link href="/receive" eventKey="/receive">
-                  Receive
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="/transaction-history">
-                  Transactions
-                </Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </Card.Header>
+
           <Card.Body>
-            <Form onSubmit={this.validate}>
+            <Form onSubmit={validate}>
               <Form.Group>
                 <Form.Label>From</Form.Label>
-                <Form.Control readOnly value={this.state.publicAddress} />
+                <Form.Control readOnly value={publicAddress} />
                 <br></br>
                 <Form.Label>To</Form.Label>
                 <Form.Control
                   type="text"
                   name="reciever"
-                  value={this.state.reciever}
-                  onChange={this.handleRecieverChange}
+                  value={receiver || ""}
+                  onChange={(e)=> setReceiver(e.target.value)}
                   placeholder="Receiver address"
                 />
-                <div style={{ color: "red" }}>{this.state.recieverError}</div>
+                <div style={{ color: "red" }}>{receiverError}</div>
                 <br></br>
                 <Form.Label>Amount</Form.Label>
                 <Form.Text className="text-muted">
-                  Available amount: {this.state.balance} ETH
+                  Available amount: {balance} ETH
                 </Form.Text>
                 <Form.Control
                   type="number"
                   name="amount"
-                  value={this.state.amount}
-                  onChange={this.handleAmountChange}
+                  value={amount || ""}
+                  onChange={(e)=> {
+                    if( e.target.value > balance) {
+                      setAmount(e.target.value);
+                      setAmountError('Insufficient funds');
+                    } else{
+                     setAmount(e.target.value);
+                     setAmountError('');
+                    }
+                     
+                   }}
                   placeholder="Enter amount"
                 />
-                <div style={{ color: "red" }}>{this.state.amountError}</div>
+                <div style={{ color: "red" }}>{amountError}</div>
                 <br></br>
                 <div style={{ color: "palegreen" }}>
-                  {this.state.successfullySent}
+                  {successfullySent}
                 </div>
               </Form.Group>
             </Form>
 
-            <this.showModal></this.showModal>
+            <ShowModal></ShowModal>
           </Card.Body>
         </Card>
       </div>
-    );
-  }
+  );
 }
+
+export default Send;

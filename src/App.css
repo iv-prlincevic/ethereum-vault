@@ -1,6 +1,36 @@
 .App {
   text-align: center;
 }
+.navigationBar img {
+  width: 150px;
+  height: 50px;
+}
+.navigationBar .container {
+  margin-left: 10px;
+  margin-right: 0px;
+  color: #fff;
+  max-width: 95%;
+}
+.navigationBar .navbar-expand-xl {
+  display: flex;
+  justify-content: space-between !important;
+}
+.navigationBar .navbar-collapse {
+  flex-grow: unset;
+}
+
+.navigationBar .logoTitle {
+  font-size: 30px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+.bg-black {
+  background-color: #000;
+}
+
+.navigationBar a {
+  font-size: 18px;
+}
 
 .App-logo {
   height: 40vmin;
