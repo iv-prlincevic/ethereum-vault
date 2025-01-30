@@ -1,14 +1,14 @@
 import React, { useRef, useState } from "react";
 import { Button, Card, Modal, Form } from "react-bootstrap";
 import ls from "local-storage";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 
 const Receive = (props) => {
   const [show, setShow] = useState(false);
   const [, setClose] = useState(false);
-  const [publicAddress,] = useState(ls.get('publicAddress'));
-  const [addressError, setAddressError] = useState('');
-  const withdrawAddress = useRef('');
+  const [publicAddress] = useState(ls.get("publicAddress"));
+  const [addressError, setAddressError] = useState("");
+  const withdrawAddress = useRef("");
 
   const saveWithdrawAddress = () => {
     ls.set("withdrawAddress", withdrawAddress.current.value);
@@ -26,7 +26,7 @@ const Receive = (props) => {
       return false;
     }
 
-    setAddressError('');
+    setAddressError("");
     setClose(true);
     saveWithdrawAddress();
     return true;
@@ -88,7 +88,7 @@ const Receive = (props) => {
       >
         <Card.Body>
           <div style={{ margin: "30px", padding: "20px" }}>
-            <QRCode value={publicAddress} />
+            <QRCodeSVG value={publicAddress} />
 
             <div style={{ fontSize: "18px", margin: "10px", color: "#fff" }}>
               Your public address: {publicAddress}

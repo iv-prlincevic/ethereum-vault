@@ -15,7 +15,7 @@ const TransactionHistory = (props) => {
         .get(
           "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=" +
             ls.get("publicAddress") +
-            "&startblock=0&endblock=99999999&sort=asc"
+            "&startblock=0&endblock=99999999&sort=asc&apikey=F2SHXT4AW1EY11ZIKXWEH49EHTMTYDZV2U"
         )
         .then((response) => {
           setTransactions([...response.data.result]);
@@ -68,7 +68,11 @@ const TransactionHistory = (props) => {
                         <td>
                           {moment.unix(tx.timeStamp).format("DD/MM/YYYY HH:mm")}
                         </td>
-                        <td>{web3.utils.fromWei(tx.value, "ether")}</td>
+                        <td>
+                          {tx.value
+                            ? web3.utils.fromWei(tx.value, "ether")
+                            : ""}
+                        </td>
                         <td>{tx.gas}</td>
                         <td className="text-truncate">
                           <a
